@@ -4,8 +4,10 @@ import 'package:svg_flutter/svg.dart';
 import 'package:tesla_animation/controller/home_controller.dart';
 
 class HomeScreen extends StatelessWidget {
-  HomeScreen({super.key});
-  final HomeController _homeController = HomeController();
+  final HomeController homeController;
+  const HomeScreen({super.key, required this.homeController});
+
+  /// final HomeController _homeController = HomeController();
 
   @override
   Widget build(BuildContext context) {
@@ -16,10 +18,7 @@ class HomeScreen extends StatelessWidget {
         decoration: BoxDecoration(
           gradient: RadialGradient(
             radius: 1.2,
-            colors: [
-              Color(0xFF1C1F26),
-              Colors.black,
-            ],
+            colors: [Color(0xFF1C1F26), Colors.black],
           ),
         ),
       ),
@@ -27,7 +26,7 @@ class HomeScreen extends StatelessWidget {
 
       body: SafeArea(
         child: AnimatedBuilder(
-          animation: _homeController,
+          animation: homeController,
           builder: (context, snapshot) {
             return LayoutBuilder(
               builder: (context, constrains) {
@@ -36,7 +35,7 @@ class HomeScreen extends StatelessWidget {
                   children: [
                     Padding(
                       padding: EdgeInsets.symmetric(
-                        vertical: constrains.maxWidth * 0.1,
+                        vertical: constrains.maxWidth * 0.4,
                       ),
                       child: SvgPicture.asset(
                         "assets/icons/Car.svg",
@@ -44,37 +43,65 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ),
 
-                    Positioned(
-                      right: constrains.maxWidth * 0.1,
-                      child: DoorLock(
-                        onTap: () =>
-                            _homeController.updateDoorStatus(Door.right),
-                        status: _homeController.isDoorLocked(Door.right),
+                    AnimatedPositioned(
+                      right: homeController.selectedIndex == 0
+                          ? constrains.maxWidth * 0.1
+                          : constrains.maxWidth / 2.2,
+                      duration: Duration(milliseconds: 300),
+                      child: AnimatedOpacity(
+                        duration: Duration(milliseconds: 300),
+                        opacity: homeController.selectedIndex == 0 ? 1 : 0,
+                        child: DoorLock(
+                          onTap: () =>
+                              homeController.updateDoorStatus(Door.right),
+                          status: homeController.isDoorLocked(Door.right),
+                        ),
                       ),
                     ),
 
-                    Positioned(
-                      left: constrains.maxWidth * 0.1,
-                      child: DoorLock(
-                        onTap: () =>
-                            _homeController.updateDoorStatus(Door.left),
-                        status: _homeController.isDoorLocked(Door.left),
+                    AnimatedPositioned(
+                      left: homeController.selectedIndex == 0
+                          ? constrains.maxWidth * 0.1
+                          : constrains.maxWidth / 2.2,
+                      duration: Duration(milliseconds: 300),
+                      child: AnimatedOpacity(
+                        duration: Duration(milliseconds: 300),
+                        opacity: homeController.selectedIndex == 0 ? 1 : 0,
+                        child: DoorLock(
+                          onTap: () =>
+                              homeController.updateDoorStatus(Door.left),
+                          status: homeController.isDoorLocked(Door.left),
+                        ),
                       ),
                     ),
-                    Positioned(
-                      top: constrains.maxWidth * 0.1,
-                      child: DoorLock(
-                        onTap: () =>
-                            _homeController.updateDoorStatus(Door.front),
-                        status: _homeController.isDoorLocked(Door.front),
+                    AnimatedPositioned(
+                      top: homeController.selectedIndex == 0
+                          ? constrains.maxWidth * 0.5
+                          : constrains.maxHeight / 2,
+                      duration: Duration(milliseconds: 300),
+                      child: AnimatedOpacity(
+                        duration: Duration(milliseconds: 300),
+                        opacity: homeController.selectedIndex == 0 ? 1 : 0,
+                        child: DoorLock(
+                          onTap: () =>
+                              homeController.updateDoorStatus(Door.front),
+                          status: homeController.isDoorLocked(Door.front),
+                        ),
                       ),
                     ),
-                    Positioned(
-                      bottom: constrains.maxWidth * 0.1,
-                      child: DoorLock(
-                        onTap: () =>
-                            _homeController.updateDoorStatus(Door.back),
-                        status: _homeController.isDoorLocked(Door.back),
+                    AnimatedPositioned(
+                      bottom: homeController.selectedIndex == 0
+                          ? constrains.maxWidth * 0.5
+                          : constrains.maxHeight / 2,
+                      duration: Duration(milliseconds: 300),
+                      child: AnimatedOpacity(
+                        duration: Duration(milliseconds: 300),
+                        opacity: homeController.selectedIndex == 0 ? 1 : 0,
+                        child: DoorLock(
+                          onTap: () =>
+                              homeController.updateDoorStatus(Door.back),
+                          status: homeController.isDoorLocked(Door.back),
+                        ),
                       ),
                     ),
                   ],
@@ -95,31 +122,19 @@ class DoorLock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // GlassContainer gives each lock a real frosted-glass disc: the SVG icon
-    // refracts/blurs the car body behind it, matching the iOS 26 look.
-    // Standard quality keeps scrolling/animation smooth on every device.
-    // alignment: center centres the icon in the disc; the Center below makes
-    // the *whole* glass disc hit-testable, not just the 53px SVG inside it.
-    return GlassContainer(
-      width: 72,
-      height: 72,
-      shape: const LiquidOval(),
-      quality: GlassQuality.standard,
-      alignment: Alignment.center,
-      child: GestureDetector(
-        onTap: () => onTap(),
-        child: Center(
-          child: AnimatedSwitcher(
-            transitionBuilder: (child, animation) =>
-                ScaleTransition(scale: animation, child: child),
-            switchInCurve: Curves.easeInOut,
-            duration: const Duration(milliseconds: 300),
-            child: SvgPicture.asset(
-              status
-                  ? "assets/icons/door_lock.svg"
-                  : "assets/icons/door_unlock.svg",
-              key: ValueKey(status),
-            ),
+    return GestureDetector(
+      onTap: () => onTap(),
+      child: Center(
+        child: AnimatedSwitcher(
+          transitionBuilder: (child, animation) =>
+              ScaleTransition(scale: animation, child: child),
+          switchInCurve: Curves.easeInOut,
+          duration: const Duration(milliseconds: 300),
+          child: SvgPicture.asset(
+            status
+                ? "assets/icons/door_lock.svg"
+                : "assets/icons/door_unlock.svg",
+            key: ValueKey(status),
           ),
         ),
       ),

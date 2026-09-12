@@ -14,7 +14,6 @@ class HomeController extends ChangeNotifier {
   int get selectedIndex => _selectedIndex;
 
   void updateThebottomSheetIndex(int index) {
-    print("index $index");
     _selectedIndex = index;
     notifyListeners();
   }
