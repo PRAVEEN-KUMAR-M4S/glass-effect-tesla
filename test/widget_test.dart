@@ -1,30 +1,39 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-
+import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 import 'package:tesla_animation/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
+  Future<void> pumpApp(WidgetTester tester) async {
     await tester.pumpWidget(const MyApp());
-
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
+    // Two pumps let the glass scopes settle and the first glass frame paint.
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
+  }
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+  testWidgets('home screen renders the liquid glass scaffold with four door locks',
+      (WidgetTester tester) async {
+    await pumpApp(tester);
+
+    // HomeScreen is built on the liquid-glass scaffold.
+    expect(find.byType(GlassScaffold), findsOneWidget);
+
+    // One frosted glass disc per door: front, back, left, right.
+    expect(find.byType(GlassContainer), findsNWidgets(4));
+
+    // All doors start unlocked (door_unlock.svg carries ValueKey(false)).
+    expect(find.byKey(const ValueKey<bool>(false)), findsNWidgets(4));
+  });
+
+  testWidgets('tapping a door lock locks it', (WidgetTester tester) async {
+    await pumpApp(tester);
+
+    // Tap the first door-lock glass disc.
+    await tester.tap(find.byType(GlassContainer).first);
+    await tester.pump(const Duration(milliseconds: 350));
+
+    // The icon switched from unlocked to locked.
+    expect(find.byKey(const ValueKey<bool>(false)), findsNWidgets(3));
+    expect(find.byKey(const ValueKey<bool>(true)), findsOneWidget);
   });
 }

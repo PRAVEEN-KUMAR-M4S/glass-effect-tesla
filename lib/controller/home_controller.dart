@@ -10,6 +10,15 @@ class HomeController extends ChangeNotifier {
     Door.back: false,
   };
 
+  int _selectedIndex = 0;
+  int get selectedIndex => _selectedIndex;
+
+  void updateThebottomSheetIndex(int index) {
+    print("index $index");
+    _selectedIndex = index;
+    notifyListeners();
+  }
+
   void updateDoorStatus(Door door) {
     doorStatus[door] = !(doorStatus[door] ?? false);
 
